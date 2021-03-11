@@ -122,9 +122,9 @@ function tmpl_reportData($reportnumber, $reports, $host_lookup = 1) {
 		$reportdata[] = "      <td>". $row['disposition']. "</td>";
 		$reportdata[] = "      <td>". $row['reason']. "</td>";
 		$reportdata[] = "      <td>". $row['dkimdomain']. "</td>";
-		$reportdata[] = "      <td>". $row['dkimresult']. "</td>";
+		$reportdata[] = "      <td>". $row['dkim_align']. "</td>";
 		$reportdata[] = "      <td>". $row['spfdomain']. "</td>";
-		$reportdata[] = "      <td>". $row['spfresult']. "</td>";
+		$reportdata[] = "      <td>". $row['spf_align']. "</td>";
 		$reportdata[] = "    </tr>";
 
 		$reportsum += $row['rcount'];
@@ -230,20 +230,20 @@ if( $sortorder ) {
 }
 
 // DMARC
-// dkimresult spfresult
+// dkim_align spf_align
 // --------------------------------------------------------------------------
 switch ($dmarc_select) {
 	case 1: // DKIM and SPF Pass: Green
-		$dmarc_where = "(rptrecord.dkimresult='pass' AND rptrecord.spfresult='pass')";
+		$dmarc_where = "(rptrecord.dkim_align='pass' AND rptrecord.spf_align='pass')";
 		break;
 	case 3: // DKIM or SPF Fail: Orange
-		$dmarc_where = "(rptrecord.dkimresult='fail' OR rptrecord.spfresult='fail')";
+		$dmarc_where = "(rptrecord.dkim_align='fail' OR rptrecord.spf_align='fail')";
 		break;
 	case 4: // DKIM and SPF Fail: Red
-		$dmarc_where = "(rptrecord.dkimresult='fail' AND rptrecord.spfresult='fail')";
+		$dmarc_where = "(rptrecord.dkim_align='fail' AND rptrecord.spf_align='fail')";
 		break;
 	case 2: // Other condition: Yellow
-		$dmarc_where = "NOT ((rptrecord.dkimresult='pass' AND rptrecord.spfresult='pass') OR (rptrecord.dkimresult='fail' OR rptrecord.spfresult='fail') OR (rptrecord.dkimresult='fail' AND rptrecord.spfresult='fail'))"; // In other words, "NOT" all three other conditions
+		$dmarc_where = "NOT ((rptrecord.dkim_align='pass' AND rptrecord.spf_align='pass') OR (rptrecord.dkim_align='fail' OR rptrecord.spf_align='fail') OR (rptrecord.dkim_align='fail' AND rptrecord.spf_align='fail'))"; // In other words, "NOT" all three other conditions
 		break;
 	default:
 		break;
@@ -253,7 +253,7 @@ switch ($dmarc_select) {
 // for every single report.
 // --------------------------------------------------------------------------
 
-$sql = "SELECT report.* , sum(rptrecord.rcount) AS rcount, MIN(rptrecord.dkimresult) AS dkimresult, MIN(rptrecord.spfresult) AS spfresult FROM report LEFT JOIN (SELECT rcount, COALESCE(dkimresult, 'neutral') AS dkimresult, COALESCE(spfresult, 'neutral') AS spfresult, serial FROM rptrecord) AS rptrecord ON report.serial = rptrecord.serial WHERE report.serial = " . $mysqli->real_escape_string($reportid) . " GROUP BY serial ORDER BY mindate $sort, maxdate $sort , org";
+$sql = "SELECT report.* , sum(rptrecord.rcount) AS rcount, MIN(rptrecord.dkim_align) AS dkim_align, MIN(rptrecord.spf_align) AS spf_align FROM report LEFT JOIN (SELECT rcount, COALESCE(dkim_align, 'neutral') AS dkim_align, COALESCE(spf_align, 'neutral') AS spf_align, serial FROM rptrecord) AS rptrecord ON report.serial = rptrecord.serial WHERE report.serial = " . $mysqli->real_escape_string($reportid) . " GROUP BY serial ORDER BY mindate $sort, maxdate $sort , org";
 
 // Debug
 // echo "<br /><b>Data Report sql:</b> $sql<br />";

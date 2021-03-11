@@ -72,13 +72,13 @@ function get_status_color($row) {
 	global $dmarc_result;
 	$status = "";
 	$status_num = "";
-	if (($row['dkimresult'] == "fail") && ($row['spfresult'] == "fail")) {
+	if (($row['dkim_align'] == "fail") && ($row['spf_align'] == "fail")) {
 		$status     = $dmarc_result['DKIM_AND_SPF_FAIL']['color'];
 		$status_num = $dmarc_result['DKIM_AND_SPF_FAIL']['status_num'];
-	} elseif (($row['dkimresult'] == "fail") || ($row['spfresult'] == "fail")) {
+	} elseif (($row['dkim_align'] == "fail") || ($row['spf_align'] == "fail")) {
 		$status     = $dmarc_result['DKIM_OR_SPF_FAIL']['color'];
 		$status_num = $dmarc_result['DKIM_OR_SPF_FAIL']['status_num'];
-	} elseif (($row['dkimresult'] == "pass") && ($row['spfresult'] == "pass")) {
+	} elseif (($row['dkim_align'] == "pass") && ($row['spf_align'] == "pass")) {
 		$status     = $dmarc_result['DKIM_AND_SPF_PASS']['color'];
 		$status_num = $dmarc_result['DKIM_AND_SPF_PASS']['status_num'];
 	} else {

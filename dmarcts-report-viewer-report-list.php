@@ -191,20 +191,20 @@ if( $sortorder ) {
 // Build SQL WHERE clause
 
 // DMARC
-// dkimresult spfresult
+// dkim_align spf_align
 // --------------------------------------------------------------------------
 switch ($dmarc_select) {
 	case 1: // DKIM and SPF Pass: Green
-		$where .= ( $where <> '' ? " AND" : " WHERE" ) . " (dkimresult='pass' AND spfresult='pass')";
+		$where .= ( $where <> '' ? " AND" : " WHERE" ) . " (dkim_align='pass' AND spf_align='pass')";
 		break;
 	case 3: // DKIM or SPF Fail: Orange
-		$where .= ( $where <> '' ? " AND" : " WHERE" ) . " (dkimresult='fail' OR spfresult='fail')";
+		$where .= ( $where <> '' ? " AND" : " WHERE" ) . " (dkim_align='fail' OR spf_align='fail')";
 		break;
 	case 4: // DKIM and SPF Fail: Red
-		$where .= ( $where <> '' ? " AND" : " WHERE" ) . " (dkimresult='fail' AND spfresult='fail')";
+		$where .= ( $where <> '' ? " AND" : " WHERE" ) . " (dkim_align='fail' AND spf_align='fail')";
 		break;
 	case 2: // Other condition: Yellow
-		$where .= ( $where <> '' ? " AND" : " WHERE" ) . " NOT ((dkimresult='pass' AND spfresult='pass') OR (dkimresult='fail' OR spfresult='fail') OR (dkimresult='fail' AND spfresult='fail'))"; // In other words, "NOT" all three other conditions
+		$where .= ( $where <> '' ? " AND" : " WHERE" ) . " NOT ((dkim_align='pass' AND spf_align='pass') OR (dkim_align='fail' OR spf_align='fail') OR (dkim_align='fail' AND spf_align='fail'))"; // In other words, "NOT" all three other conditions
 		break;
 	default: 
 		break;
@@ -235,7 +235,7 @@ if( $per_select <> '' ) {
 // --------------------------------------------------------------------------
 // $where = where_clause($dmarc_select, $dom_select, $org_select, $per_select);
 
-$sql = "SELECT report.* , sum(rptrecord.rcount) AS rcount, MIN(rptrecord.dkimresult) AS dkimresult, MIN(rptrecord.spfresult) AS spfresult FROM report LEFT JOIN (SELECT rcount, COALESCE(dkimresult, 'neutral') AS dkimresult, COALESCE(spfresult, 'neutral') AS spfresult, serial FROM rptrecord) AS rptrecord ON report.serial = rptrecord.serial $where GROUP BY serial ORDER BY mindate $sort, org";
+$sql = "SELECT report.* , sum(rptrecord.rcount) AS rcount, MIN(rptrecord.dkim_align) AS dkim_align, MIN(rptrecord.spf_align) AS spf_align FROM report LEFT JOIN (SELECT rcount, COALESCE(dkim_align, 'neutral') AS dkim_align, COALESCE(spf_align, 'neutral') AS spf_align, serial FROM rptrecord) AS rptrecord ON report.serial = rptrecord.serial $where GROUP BY serial ORDER BY mindate $sort, org";
 
 // Debug
 // echo "<br />sql where = $where<br />";
