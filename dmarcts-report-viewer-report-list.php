@@ -64,7 +64,7 @@ function tmpl_reportList($reports, $sort) {
 			$row = array_map('htmlspecialchars', $row);
 			$date_output_format = "Y-m-d G:i:s T";
 			$reportlist[] =  "    <tr class='linkable' onclick=\"showReport('" . $row['serial'] . "')\" id='report" . $row['serial'] . "'>";
-			$reportlist[] =  "      <td class='right'><span class=\"circle_".get_status_color($row)[0]."\"><span style='display:none;'>" . get_status_color($row)[1] . "</span></span></td>"; // Col 0
+			$reportlist[] =  "      <td class='right'><span class=\"circle_".get_dmarc_color($row)[0]."\"><span style='display:none;'>" . get_dmarc_color($row)[1] . "</span></span></td>"; // Col 0
 			$reportlist[] =  "      <td class='right'>". format_date($row['mindate'], $date_output_format). "</td>";   // Col 1
 			$reportlist[] =  "      <td class='right'>". format_date($row['maxdate'], $date_output_format). "</td>";   // Col 3
 			$reportlist[] =  "      <td class='center'>". $row['domain']. "</td>";                                     // Col 5

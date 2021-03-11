@@ -98,7 +98,7 @@ function tmpl_reportData($reportnumber, $reports, $host_lookup = 1) {
 
 	$query = $mysqli->query($sql) or die("Query failed: ".$mysqli->error." (Error #" .$mysqli->errno.")");
 	while($row = $query->fetch_assoc()) {
-		$status = get_status_color($row);
+		$status = get_dmarc_color($row);
 
 		if ( $row['ip'] ) {
 			$ip = long2ip($row['ip']);
@@ -111,7 +111,7 @@ function tmpl_reportData($reportnumber, $reports, $host_lookup = 1) {
 		/* escape html characters after exploring binary values, which will be messed up */
 		$row = array_map('htmlspecialchars', $row);
 
-		$reportdata[] = "    <tr class='".get_status_color($row)[0]."'>";
+		$reportdata[] = "    <tr class='".get_dmarc_color($row)[0]."'>";
 		$reportdata[] = "      <td>". $ip. "</td>";
 		if ( $host_lookup ) {
 			$reportdata[] = "      <td>". gethostbyaddr($ip). "</td>";

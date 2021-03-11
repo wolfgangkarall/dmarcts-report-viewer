@@ -82,7 +82,7 @@ function main() {
 }
 
 
-function get_status_color($row) {
+function get_dmarc_color($row) {
 	global $dmarc_result;
 	$status = "";
 	$status_num = "";
