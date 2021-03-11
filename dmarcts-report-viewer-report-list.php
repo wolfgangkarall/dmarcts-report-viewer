@@ -194,21 +194,16 @@ if( $sortorder ) {
 // dkim_align spf_align
 // --------------------------------------------------------------------------
 switch ($dmarc_select) {
-	case 1: // DKIM and SPF Pass: Green
-		$where .= ( $where <> '' ? " AND" : " WHERE" ) . " (dkim_align='pass' AND spf_align='pass')";
+	case 'PASS': // DKIM or SPF Pass: Green
+		$where .= ( $where <> '' ? " AND" : " WHERE" ) . " " .  $dmarc_result[$dmarc_select]['where_stmt'];
 		break;
-	case 3: // DKIM or SPF Fail: Orange
-		$where .= ( $where <> '' ? " AND" : " WHERE" ) . " (dkim_align='fail' OR spf_align='fail')";
-		break;
-	case 4: // DKIM and SPF Fail: Red
-		$where .= ( $where <> '' ? " AND" : " WHERE" ) . " (dkim_align='fail' AND spf_align='fail')";
-		break;
-	case 2: // Other condition: Yellow
-		$where .= ( $where <> '' ? " AND" : " WHERE" ) . " NOT ((dkim_align='pass' AND spf_align='pass') OR (dkim_align='fail' OR spf_align='fail') OR (dkim_align='fail' AND spf_align='fail'))"; // In other words, "NOT" all three other conditions
+	case 'FAIL': // neither of DKIM or SPF Pass: Red
+		$where .= ( $where <> '' ? " AND" : " WHERE" ) . " " .  $dmarc_result[$dmarc_select]['where_stmt'];
 		break;
 	default: 
 		break;
 }
+
 
 // Domains
 // --------------------------------------------------------------------------

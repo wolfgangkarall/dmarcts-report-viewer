@@ -233,17 +233,11 @@ if( $sortorder ) {
 // dkim_align spf_align
 // --------------------------------------------------------------------------
 switch ($dmarc_select) {
-	case 1: // DKIM and SPF Pass: Green
-		$dmarc_where = "(rptrecord.dkim_align='pass' AND rptrecord.spf_align='pass')";
+	case 'PASS': // DKIM or SPF Pass: Green
+		$dmarc_where = $dmarc_result[$dmarc_select]['where_stmt'];
 		break;
-	case 3: // DKIM or SPF Fail: Orange
-		$dmarc_where = "(rptrecord.dkim_align='fail' OR rptrecord.spf_align='fail')";
-		break;
-	case 4: // DKIM and SPF Fail: Red
-		$dmarc_where = "(rptrecord.dkim_align='fail' AND rptrecord.spf_align='fail')";
-		break;
-	case 2: // Other condition: Yellow
-		$dmarc_where = "NOT ((rptrecord.dkim_align='pass' AND rptrecord.spf_align='pass') OR (rptrecord.dkim_align='fail' OR rptrecord.spf_align='fail') OR (rptrecord.dkim_align='fail' AND rptrecord.spf_align='fail'))"; // In other words, "NOT" all three other conditions
+	case 'FAIL': // neither of DKIM or SPF Pass: Red
+		$dmarc_where = $dmarc_result[$dmarc_select]['where_stmt'];
 		break;
 	default:
 		break;

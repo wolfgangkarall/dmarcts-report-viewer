@@ -35,6 +35,20 @@
 //####################################################################
 
 $dmarc_result = array(
+	'PASS' => array(
+		'text' => 'Pass',
+		'color' => 'lime',
+		'where_stmt' => "( rptrecord.dkim_align='pass' OR rptrecord.spf_align='pass' )",
+	),
+	'FAIL' => array(
+		'text' => 'Fail',
+		'color' => 'red',
+		'where_stmt' => "( NOT ( rptrecord.dkim_align='pass' OR rptrecord.spf_align='pass' ) )",
+	),
+);
+
+// currently unused, maybe introduce another drop-down to drill down on the details?
+$dkim_spf_result = array(
 	'DKIM_AND_SPF_PASS' => array(
 		'text' => 'DKIM and SPF Pass',
 		'color' => 'lime',
@@ -72,18 +86,10 @@ function get_status_color($row) {
 	global $dmarc_result;
 	$status = "";
 	$status_num = "";
-	if (($row['dkim_align'] == "fail") && ($row['spf_align'] == "fail")) {
-		$status     = $dmarc_result['DKIM_AND_SPF_FAIL']['color'];
-		$status_num = $dmarc_result['DKIM_AND_SPF_FAIL']['status_num'];
-	} elseif (($row['dkim_align'] == "fail") || ($row['spf_align'] == "fail")) {
-		$status     = $dmarc_result['DKIM_OR_SPF_FAIL']['color'];
-		$status_num = $dmarc_result['DKIM_OR_SPF_FAIL']['status_num'];
-	} elseif (($row['dkim_align'] == "pass") && ($row['spf_align'] == "pass")) {
-		$status     = $dmarc_result['DKIM_AND_SPF_PASS']['color'];
-		$status_num = $dmarc_result['DKIM_AND_SPF_PASS']['status_num'];
+	if (($row['dkim_align'] == "pass") || ($row['spf_align'] == "pass")) {
+		$status     = $dmarc_result['PASS']['color'];
 	} else {
-		$status     = $dmarc_result['OTHER_CONDITION']['color'];
-		$status_num = $dmarc_result['OTHER_CONDITION']['status_num'];
+		$status     = $dmarc_result['FAIL']['color'];
 	}
 #	$status .= "\"><span style='display:none;'>" . $status_content . "</span></span>";
 #	$status_num .= "\"><span style='display:none;'>" . $status_content . "</span></span>";
