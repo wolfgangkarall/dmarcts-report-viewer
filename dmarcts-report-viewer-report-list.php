@@ -70,13 +70,13 @@ function tmpl_reportList($reports, $sort) {
 			$reportlist[] =  "      <td class='center'>". $row['domain']. "</td>";                                     // Col 5
 			$reportlist[] =  "      <td class='center'>". $row['org']. "</td>";                                        // Col 6
 			$reportlist[] =  "      <td class='center'>". $row['reportid'] . "</td>";
-			$reportlist[] =  "      <td class='center'>". number_format($row['rcount']+0,0). "</td>";                  // Col 9
+			$reportlist[] =  "      <td class='center'>". $row['rcount'] . "</td>";                  // Col 9
 			$reportlist[] =  "    </tr>";
 			$reportsum += $row['rcount'];
 		}
 
 		$reportlist[] =  "  </tbody>";
-		$reportlist[] = "<tr class='sum'><td></td><td></td><td></td><td></td><td></td><td class='right'>Sum:</td><td class='center'>".number_format($reportsum,0)."</td></tr>";
+		$reportlist[] = "<tr class='sum'><td></td><td></td><td></td><td></td><td></td><td class='right'>Sum:</td><td class='center'>".$reportsum."</td></tr>";
 		$reportlist[] =  "</table>";
 
 		$reportlist[] = "<!-- End of report list -->";
