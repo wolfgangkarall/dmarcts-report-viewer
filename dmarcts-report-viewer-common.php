@@ -34,7 +34,12 @@
 //### variables ######################################################
 //####################################################################
 
+// drop-down will be filled in order
 $dmarc_result = array(
+	'MIXED' => array(
+		'text' => '[all]',
+		'color' => 'half_orange',
+	),
 	'PASS' => array(
 		'text' => 'Pass',
 		'color' => 'lime',
@@ -81,8 +86,22 @@ function main() {
 
 }
 
+function get_dmarc_report_color($row) {
+	global $dmarc_result;
+	$status = "";
+	$status_sort_key = "";
+	if (($row['dmarc_result_pass'] == 1) && ($row['dmarc_result_fail'] == 1)) {
+		$status_sort_key = 'MIXED';
+	} elseif ($row['dmarc_result_pass'] == 1) {
+		$status_sort_key = 'PASS';
+	} else {
+		$status_sort_key = 'FAIL';
+	}
+	$status = $dmarc_result[$status_sort_key]['color'];
+	return array($status, $status_sort_key);
+}
 
-function get_dmarc_color($row) {
+function get_dmarc_record_color($row) {
 	global $dmarc_result;
 	$status = "";
 	$status_num = "";
@@ -91,9 +110,7 @@ function get_dmarc_color($row) {
 	} else {
 		$status     = $dmarc_result['FAIL']['color'];
 	}
-#	$status .= "\"><span style='display:none;'>" . $status_content . "</span></span>";
-#	$status_num .= "\"><span style='display:none;'>" . $status_content . "</span></span>";
-    return array($status, $status_num);
+	return array($status, $status_num);
 }
 
 function format_date($date, $format) {

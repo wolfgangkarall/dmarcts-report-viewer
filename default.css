@@ -200,6 +200,36 @@ table.reportdata tr.yellow {
 	text-align:right;
 }
 
+.circle_half_black:before {
+	content: ' \25D0';
+	font-size: 25px;
+	color: #000000;
+}
+
+.circle_half_lime:before {
+	content: ' \25D0';
+	font-size: 25px;
+	color: #00FF00;
+}
+
+.circle_half_red:before {
+	content: ' \25D0';
+	font-size: 25px;
+	color: #FF0000;
+}
+
+.circle_half_yellow:before {
+	content: ' \25D0';
+	font-size: 25px;
+	color: #FFFF00;
+}
+
+.circle_half_orange:before {
+	content: ' \25D0';
+	font-size: 25px;
+	color: #FFA500;
+}
+
 .circle_black:before {
 	content: ' \25CF';
 	font-size: 25px;

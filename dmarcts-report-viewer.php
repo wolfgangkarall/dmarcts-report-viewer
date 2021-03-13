@@ -69,7 +69,6 @@ function html ($default_hostlookup = 1, $default_dmarc_result = undef, $default_
 	// 	--------------------------------------------------------------------------
 		$html[] = "<div class='options'><span class='optionlabel'>DMARC Result:</span>";
 		$html[] = "<select name=\"selDMARC\" id=\"selDMARC\" onchange=\"showReportlist('reportlistTbl')\">";
-		$html[] = "<option " . ( $default_dmarc_result ? "" : "selected=\"selected\" " ) . "value=\"all\">[all]</option>";
 		foreach($dmarc_result as $key => $value) {
 			$html[] = sprintf("<option %s value=\"%s\">%s</option>",
 					$default_dmarc_result == $key ? "selected=\"selected\"" : "",
