@@ -82,9 +82,9 @@ function tmpl_reportData($reportnumber, $reports, $host_lookup = 1) {
 	$reportdata[] = "      <th title='" . $title_message . "'>Disposition</th>";
 	$reportdata[] = "      <th title='" . $title_message . "'>Reason</th>";
 	$reportdata[] = "      <th title='" . $title_message . "'>DKIM<br />Domain</th>";
-	$reportdata[] = "      <th title='" . $title_message . "'>DKIM<br />Result</th>";
+	$reportdata[] = "      <th title='" . $title_message . "'>DKIM<br />Aligned</th>";
 	$reportdata[] = "      <th title='" . $title_message . "'>SPF<br />Domain</th>";
-	$reportdata[] = "      <th title='" . $title_message . "'>SPF<br />Result</th>";
+	$reportdata[] = "      <th title='" . $title_message . "'>SPF<br />Aligned</th>";
 // 	$reportdata[] = "      <th><img src='xml.png' id='xml_html_img' title='Show Raw Report XML' onclick='showXML()' style='float:left;'></th>";
 	$reportdata[] = "    </tr>";
 	$reportdata[] = "  </thead>";
@@ -92,7 +92,11 @@ function tmpl_reportData($reportnumber, $reports, $host_lookup = 1) {
 	$reportdata[] = "  <tbody>";
 
 	global $mysqli;
-	$sql = "SELECT * FROM rptrecord where serial = $reportnumber" . ( $dmarc_where ? " AND $dmarc_where" : "" ) . " ORDER BY ip ASC";
+	$sql = "SELECT *
+	        FROM rptrecord
+	        WHERE serial = $reportnumber" .
+	              ( $dmarc_where ? " AND $dmarc_where" : "" ) . "
+	        ORDER BY ip ASC";
 // Debug
 // echo "<br><b>sql reportdata =</b> $sql<br>";
 
@@ -241,17 +245,27 @@ switch ($dmarc_select) {
 // for every single report.
 // --------------------------------------------------------------------------
 
-$sql = "SELECT report.* , sum(rptrecord.rcount) AS rcount, MIN(rptrecord.dkim_align) AS dkim_align, MIN(rptrecord.spf_align) AS spf_align FROM report LEFT JOIN (SELECT rcount, COALESCE(dkim_align, 'neutral') AS dkim_align, COALESCE(spf_align, 'neutral') AS spf_align, serial FROM rptrecord) AS rptrecord ON report.serial = rptrecord.serial WHERE report.serial = " . $mysqli->real_escape_string($reportid) . " GROUP BY serial ORDER BY mindate $sort, maxdate $sort , org";
+$sql = "SELECT report.*,
+               SUM(rptrecord.rcount) AS rcount
+        FROM report
+        LEFT JOIN
+          (SELECT rcount,
+                  serial
+          FROM rptrecord) AS rptrecord
+        ON report.serial = rptrecord.serial
+        WHERE report.serial = " . $mysqli->real_escape_string($reportid) . "
+        GROUP BY serial
+        ORDER BY mindate $sort,
+                 maxdate $sort,
+                 org";
 
 // Debug
 // echo "<br /><b>Data Report sql:</b> $sql<br />";
 
 $query = $mysqli->query($sql) or die("Query failed: ".$mysqli->error." (Error #" .$mysqli->errno.")");
 while($row = $query->fetch_assoc()) {
-	if (true) {
-		//add data by serial
-		$reports[$row['serial']] = $row;
-	}
+	//add data by serial
+	$reports[$row['serial']] = $row;
 }
 
 // Generate Page with report list and report data (if a report is selected).
