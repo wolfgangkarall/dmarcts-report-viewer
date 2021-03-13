@@ -50,7 +50,7 @@ function reset_report_list() {
 	
 	filter = document.getElementsByTagName("select");
 	for (i = 0; i < filter.length; i++) {
-		filter[i].value = "all";
+		filter[i].selectedIndex = 0;
 	}
 	refresh_report_list();
 }
