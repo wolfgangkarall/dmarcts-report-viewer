@@ -193,7 +193,7 @@ if(isset($_GET['sortorder']) && is_numeric($_GET['sortorder'])){
 	die('Invalid sortorder flag');
 }
 
-if($dmarc_results_matching_only && isset($_GET['dmarc'])){
+if(isset($_GET['dmarc'])){
 	$dmarc_select=$_GET['dmarc'];
 }else{
 	$dmarc_select= '';

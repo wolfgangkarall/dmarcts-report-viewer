@@ -15,7 +15,6 @@ $cssfile="default.css";
 $default_hostlookup = 1;  // Hostname resolution: 1=on 0=off (Turning off host lookup greatly speeds up the program in the case of mail servers that have ceased to exist)
 $default_sort = 1;  // Report listing Start Date: 1=ASCdending 0=DESCending (ASCending is default behaviour )
 
-
 // configure defaults (used on initial page load) for drop-downs
 
 // default for drop-down 'Domain(s)'
@@ -26,13 +25,9 @@ $default_sort = 1;  // Report listing Start Date: 1=ASCdending 0=DESCending (ASC
 
 // default for drop-down 'DMARC Result'
 // one of:
-// - DKIM_AND_SPF_PASS
-// - DKIM_OR_SPF_FAIL
-// - DKIM_AND_SPF_FAIL
-// - OTHER_CONDITION
-// $default_dmarc_result = 'DKIM_AND_SPF_FAIL';
-
-// show only records of a report that match the 'DMARC Result' drop-down?
-// $dmarc_results_matching_only = 0;
+// - MIXED
+// - PASS
+// - FAIL
+// $default_dmarc_result = 'MIXED';
 
 ?>
