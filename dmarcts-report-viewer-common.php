@@ -34,7 +34,26 @@
 //### variables ######################################################
 //####################################################################
 
+// drop-down will be filled in order
 $dmarc_result = array(
+	'MIXED' => array(
+		'text' => '[all]',
+		'color' => 'half_orange',
+	),
+	'PASS' => array(
+		'text' => 'Pass',
+		'color' => 'lime',
+		'where_stmt' => "( rptrecord.dkim_align='pass' OR rptrecord.spf_align='pass' )",
+	),
+	'FAIL' => array(
+		'text' => 'Fail',
+		'color' => 'red',
+		'where_stmt' => "( NOT ( rptrecord.dkim_align='pass' OR rptrecord.spf_align='pass' ) )",
+	),
+);
+
+// currently unused, maybe introduce another drop-down to drill down on the details?
+$dkim_spf_result = array(
 	'DKIM_AND_SPF_PASS' => array(
 		'text' => 'DKIM and SPF Pass',
 		'color' => 'lime',
@@ -67,27 +86,31 @@ function main() {
 
 }
 
+function get_dmarc_report_color($row) {
+	global $dmarc_result;
+	$status = "";
+	$status_sort_key = "";
+	if (($row['dmarc_result_pass'] == 1) && ($row['dmarc_result_fail'] == 1)) {
+		$status_sort_key = 'MIXED';
+	} elseif ($row['dmarc_result_pass'] == 1) {
+		$status_sort_key = 'PASS';
+	} else {
+		$status_sort_key = 'FAIL';
+	}
+	$status = $dmarc_result[$status_sort_key]['color'];
+	return array($status, $status_sort_key);
+}
 
-function get_status_color($row) {
+function get_dmarc_record_color($row) {
 	global $dmarc_result;
 	$status = "";
 	$status_num = "";
-	if (($row['dkimresult'] == "fail") && ($row['spfresult'] == "fail")) {
-		$status     = $dmarc_result['DKIM_AND_SPF_FAIL']['color'];
-		$status_num = $dmarc_result['DKIM_AND_SPF_FAIL']['status_num'];
-	} elseif (($row['dkimresult'] == "fail") || ($row['spfresult'] == "fail")) {
-		$status     = $dmarc_result['DKIM_OR_SPF_FAIL']['color'];
-		$status_num = $dmarc_result['DKIM_OR_SPF_FAIL']['status_num'];
-	} elseif (($row['dkimresult'] == "pass") && ($row['spfresult'] == "pass")) {
-		$status     = $dmarc_result['DKIM_AND_SPF_PASS']['color'];
-		$status_num = $dmarc_result['DKIM_AND_SPF_PASS']['status_num'];
+	if (($row['dkim_align'] == "pass") || ($row['spf_align'] == "pass")) {
+		$status     = $dmarc_result['PASS']['color'];
 	} else {
-		$status     = $dmarc_result['OTHER_CONDITION']['color'];
-		$status_num = $dmarc_result['OTHER_CONDITION']['status_num'];
+		$status     = $dmarc_result['FAIL']['color'];
 	}
-#	$status .= "\"><span style='display:none;'>" . $status_content . "</span></span>";
-#	$status_num .= "\"><span style='display:none;'>" . $status_content . "</span></span>";
-    return array($status, $status_num);
+	return array($status, $status_num);
 }
 
 function format_date($date, $format) {

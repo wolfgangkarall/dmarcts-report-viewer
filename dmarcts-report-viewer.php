@@ -34,7 +34,7 @@
 //### functions ######################################################
 //####################################################################
 
-function html ($default_hostlookup = 1, $default_dmarc_result = undef, $default_domain = undef, $default_reporter = undef, $cssfile, $domains = array(), $orgs = array(), $periods = array() ) {
+function html ($default_hostlookup = 1, $default_dmarc_result, $default_domain, $default_reporter, $cssfile, $domains = array(), $orgs = array(), $periods = array() ) {
 
 	global $dmarc_result;
 
@@ -69,11 +69,10 @@ function html ($default_hostlookup = 1, $default_dmarc_result = undef, $default_
 	// 	--------------------------------------------------------------------------
 		$html[] = "<div class='options'><span class='optionlabel'>DMARC Result:</span>";
 		$html[] = "<select name=\"selDMARC\" id=\"selDMARC\" onchange=\"showReportlist('reportlistTbl')\">";
-		$html[] = "<option " . ( $default_dmarc_result ? "" : "selected=\"selected\" " ) . "value=\"all\">[all]</option>";
 		foreach($dmarc_result as $key => $value) {
-			$html[] = sprintf("<option %s value=\"%d\">%s</option>",
+			$html[] = sprintf("<option %s value=\"%s\">%s</option>",
 					$default_dmarc_result == $key ? "selected=\"selected\"" : "",
-					$value['status_num'],
+					$key,
 					$value['text'],
 				);
 		}
@@ -224,9 +223,9 @@ while($row = $query->fetch_assoc()) {
 // --------------------------------------------------------------------------
 echo html( 
 	$default_hostlookup, 
-	$default_dmarc_result,
-	$default_domain,
-	$default_reporter,
+	isset($default_dmarc_result) ? $default_dmarc_result : null,
+	isset($default_domain) ? $default_domain : null,
+	isset($default_reporter) ? $default_reporter : null,
 	$cssfile, 
 	$domains, 
 	$orgs, 

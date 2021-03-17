@@ -64,7 +64,7 @@ function tmpl_reportList($reports, $sort) {
 			$row = array_map('htmlspecialchars', $row);
 			$date_output_format = "Y-m-d G:i:s T";
 			$reportlist[] =  "    <tr class='linkable' onclick=\"showReport('" . $row['serial'] . "')\" id='report" . $row['serial'] . "'>";
-			$reportlist[] =  "      <td class='right'><span class=\"circle_".get_status_color($row)[0]."\"><span style='display:none;'>" . get_status_color($row)[1] . "</span></span></td>"; // Col 0
+			$reportlist[] =  "      <td class='right'><span class=\"circle_".get_dmarc_report_color($row)[0]."\"><span style='display:none;'>" . get_dmarc_report_color($row)[1] . "</span></span></td>"; // Col 0
 			$reportlist[] =  "      <td class='right'>". format_date($row['mindate'], $date_output_format). "</td>";   // Col 1
 			$reportlist[] =  "      <td class='right'>". format_date($row['maxdate'], $date_output_format). "</td>";   // Col 3
 			$reportlist[] =  "      <td class='center'>". $row['domain']. "</td>";                                     // Col 5
@@ -155,10 +155,6 @@ if(isset($_GET['dmarc'])){
 	$dmarc_select= '';
 }
 
-if( $dmarc_select == "all" ) {
-	$dmarc_select= '';
-}
-
 // Debug
 // echo "<br />D=$dom_select <br /> O=$org_select <br />";
 // echo "<br />DMARC=$dmarc_select<br />";
@@ -191,24 +187,21 @@ if( $sortorder ) {
 // Build SQL WHERE clause
 
 // DMARC
-// dkimresult spfresult
+// dkim_align spf_align
 // --------------------------------------------------------------------------
 switch ($dmarc_select) {
-	case 1: // DKIM and SPF Pass: Green
-		$where .= ( $where <> '' ? " AND" : " WHERE" ) . " (dkimresult='pass' AND spfresult='pass')";
+	case 'PASS': // DKIM or SPF Pass: Green
+		$dmarc_where = $dmarc_result[$dmarc_select]['where_stmt'];
+		$where .= ( $where <> '' ? " AND" : " WHERE" ) . " " .  $dmarc_where;
 		break;
-	case 3: // DKIM or SPF Fail: Orange
-		$where .= ( $where <> '' ? " AND" : " WHERE" ) . " (dkimresult='fail' OR spfresult='fail')";
-		break;
-	case 4: // DKIM and SPF Fail: Red
-		$where .= ( $where <> '' ? " AND" : " WHERE" ) . " (dkimresult='fail' AND spfresult='fail')";
-		break;
-	case 2: // Other condition: Yellow
-		$where .= ( $where <> '' ? " AND" : " WHERE" ) . " NOT ((dkimresult='pass' AND spfresult='pass') OR (dkimresult='fail' OR spfresult='fail') OR (dkimresult='fail' AND spfresult='fail'))"; // In other words, "NOT" all three other conditions
+	case 'FAIL': // neither of DKIM or SPF Pass: Red
+		$dmarc_where = $dmarc_result[$dmarc_select]['where_stmt'];
+		$where .= ( $where <> '' ? " AND" : " WHERE" ) . " " .  $dmarc_where;
 		break;
 	default: 
 		break;
 }
+
 
 // Domains
 // --------------------------------------------------------------------------
@@ -235,7 +228,25 @@ if( $per_select <> '' ) {
 // --------------------------------------------------------------------------
 // $where = where_clause($dmarc_select, $dom_select, $org_select, $per_select);
 
-$sql = "SELECT report.* , sum(rptrecord.rcount) AS rcount, MIN(rptrecord.dkimresult) AS dkimresult, MIN(rptrecord.spfresult) AS spfresult FROM report LEFT JOIN (SELECT rcount, COALESCE(dkimresult, 'neutral') AS dkimresult, COALESCE(spfresult, 'neutral') AS spfresult, serial FROM rptrecord) AS rptrecord ON report.serial = rptrecord.serial $where GROUP BY serial ORDER BY mindate $sort, org";
+$sql = "SELECT report.*,
+               SUM(rptrecord.rcount) AS rcount,
+               MAX(rptrecord.dmarc_result_pass) AS dmarc_result_pass,
+               MAX(rptrecord.dmarc_result_fail) AS dmarc_result_fail
+        FROM report
+        LEFT JOIN
+          (SELECT rcount,
+                  COALESCE(dkim_align, 'unknown') AS dkim_align,
+                  COALESCE(spf_align, 'unknown') AS spf_align,
+                  ". $dmarc_result['PASS']['where_stmt'] ." AS dmarc_result_pass,
+                  ". $dmarc_result['FAIL']['where_stmt'] ." AS dmarc_result_fail,
+                  serial
+          FROM rptrecord" .  ( isset($dmarc_where) ? " WHERE $dmarc_where" : "") .
+         ") AS rptrecord
+        ON report.serial = rptrecord.serial
+        $where
+        GROUP BY serial
+        ORDER BY mindate $sort,
+                 org";
 
 // Debug
 // echo "<br />sql where = $where<br />";
