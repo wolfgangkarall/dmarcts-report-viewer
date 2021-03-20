@@ -25,9 +25,9 @@ $default_sort = 1;  // Report listing Start Date: 1=ASCdending 0=DESCending (ASC
 
 // default for drop-down 'DMARC Result'
 // one of:
-// - MIXED
-// - PASS
-// - FAIL
-// $default_dmarc_result = 'MIXED';
+// - DMARC_PASS
+// - DMARC_FAIL
+// - DMARC_PASS_AND_FAIL
+// $default_dmarc_result = 'DMARC_PASS';
 
 ?>
