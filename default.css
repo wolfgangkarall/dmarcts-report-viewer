@@ -23,13 +23,23 @@ table.reportlist td {
 	padding:0px 10px;
 }
 
+table.reportlist td.circle_container {
+	padding-left: 0px;
+	padding-right: 0px;
+}
+
 table.reportlist th {
-        padding:3px;
+	padding: 3px 0px;
 	position: -webkit-sticky; /* Safari */
 	position: sticky;
 	top: 0;
 	background-color: silver;
 	cursor: pointer;
+}
+
+table.reportlist th.circle_container {
+	padding-left: 0px;
+	padding-right: 0px;
 }
 
 /*
@@ -102,20 +112,36 @@ table.reportdata tr th {
 	cursor:pointer;
 }
 
-table.reportdata tr.red {
-	background-color: #FF0000;
+table.reportdata tr.red{
+	background-color: #FF5C70;
+}
+
+table.reportdata td.red {
+	background-color: #FF5C70;
 }
 
 table.reportdata tr.orange {
 	background-color: #FFA500;
 }
 
-table.reportdata tr.lime {
-	background-color: #00FF00;
+table.reportdata td.orange {
+	background-color: #FFA500;
+}
+
+table.reportdata tr.green {
+	background-color: #8eff8e;
+}
+
+table.reportdata td.green {
+	background-color: #8eff8e;
 }
 
 table.reportdata tr.yellow {
-	background-color: #FFFF00;
+	background-color: #ffff50;
+}
+
+table.reportdata td.yellow {
+	background-color: #ffff50;
 }
 
 .footer {
@@ -200,64 +226,45 @@ table.reportdata tr.yellow {
 	text-align:right;
 }
 
-.circle_half_black:before {
-	content: ' \25D0';
-	font-size: 25px;
-	color: #000000;
+.circle {
+    width: 7px;
+    height: 14px;
+	margin-top: 4px;
+    margin-bottom: 2px;
 }
 
-.circle_half_lime:before {
-	content: ' \25D0';
-	font-size: 25px;
-	color: #00FF00;
+.circle_right {
+    border-bottom-right-radius: 500px;
+    border-top-right-radius: 500px;
+    border-left: 0;
+    display: inline-block;
 }
 
-.circle_half_red:before {
-	content: ' \25D0';
-	font-size: 25px;
-	color: #FF0000;
+.circle_left {
+    border-bottom-left-radius: 500px;
+    border-top-left-radius: 500px;
+    border-right: 0;
+    display: inline-block;
 }
 
-.circle_half_yellow:before {
-	content: ' \25D0';
-	font-size: 25px;
-	color: #FFFF00;
+.circle_yellow {
+    background-color: yellow;
 }
 
-.circle_half_orange:before {
-	content: ' \25D0';
-	font-size: 25px;
-	color: #FFA500;
+.circle_green {
+    background-color: lime;
 }
 
-.circle_black:before {
-	content: ' \25CF';
-	font-size: 25px;
-	color: #000000;
+.circle_orange {
+    background-color: orange;
 }
 
-.circle_lime:before {
-	content: ' \25CF';
-	font-size: 25px;
-	color: #00FF00;
+.circle_red {
+    background-color: orangered;
 }
 
-.circle_red:before {
-	content: ' \25CF';
-	font-size: 25px;
-	color: #FF0000;
-}
-
-.circle_yellow:before {
-	content: ' \25CF';
-	font-size: 25px;
-	color: #FFFF00;
-}
-
-.circle_orange:before {
-	content: ' \25CF';
-	font-size: 25px;
-	color: #FFA500;
+.circle_black {
+    background-color: black;
 }
 
 .asc_triangle:after {
