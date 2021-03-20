@@ -224,7 +224,6 @@ function showReport(str) {
 				set_report_data_heights();
 				document.getElementsByTagName("HTML")[0].style.cursor = "default";
 				document.getElementById('reportlistTbl').querySelectorAll('tr').forEach(tr => tr.style.cursor = "pointer");
-				document.getElementById("icons").style.display = "";
 			}
 		};
 
