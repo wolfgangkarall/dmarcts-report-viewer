@@ -34,7 +34,7 @@
 //### functions ######################################################
 //####################################################################
 
-function html ($default_hostlookup = 1, $default_dmarc_result, $default_domain, $default_reporter, $cssfile, $domains = array(), $orgs = array(), $periods = array() ) {
+function html ($default_hostlookup = 1, $default_dmarc_result = undef, $default_domain = undef, $default_reporter = undef, $cssfile, $domains = array(), $orgs = array(), $periods = array() ) {
 
 	global $dmarc_result;
 
@@ -69,10 +69,11 @@ function html ($default_hostlookup = 1, $default_dmarc_result, $default_domain, 
 	// 	--------------------------------------------------------------------------
 		$html[] = "<div class='options'><span class='optionlabel'>DMARC Result:</span>";
 		$html[] = "<select name=\"selDMARC\" id=\"selDMARC\" onchange=\"showReportlist('reportlistTbl')\">";
+		$html[] = "<option " . ( $default_dmarc_result ? "" : "selected=\"selected\" " ) . "value=\"all\">[all]</option>";
 		foreach($dmarc_result as $key => $value) {
-			$html[] = sprintf("<option %s value=\"%s\">%s</option>",
+			$html[] = sprintf("<option style='color: " . $value['color'] . "' %s value=\"%d\">%s</option>",
 					$default_dmarc_result == $key ? "selected=\"selected\"" : "",
-					$key,
+					$value['status_num'],
 					$value['text'],
 				);
 		}
@@ -191,7 +192,12 @@ if ($mysqli->connect_errno) {
 
 // Get all domains reported
 // --------------------------------------------------------------------------
-$sql="SELECT DISTINCT domain FROM `report` ORDER BY domain";
+$sql="
+SELECT
+	DISTINCT domain
+FROM
+	report
+ORDER BY domain";
 
 $query = $mysqli->query($sql) or die("Query failed: ".$mysqli->error." (Error #" .$mysqli->errno.")");
 
@@ -201,7 +207,12 @@ while($row = $query->fetch_assoc()) {
 
 // Get all organisations
 // --------------------------------------------------------------------------
-$sql="SELECT DISTINCT org FROM `report` ORDER BY org";
+$sql="
+SELECT
+	DISTINCT org
+FROM
+	report
+ORDER BY org";
 
 $query = $mysqli->query($sql) or die("Query failed: ".$mysqli->error." (Error #" .$mysqli->errno.")");
 
@@ -211,7 +222,23 @@ while($row = $query->fetch_assoc()) {
 
 // Get all periods
 // --------------------------------------------------------------------------
-$sql="(SELECT year(mindate) as year, month(mindate) as month FROM `report`) UNION (SELECT year(maxdate) as year, month(maxdate) as month FROM `report`) ORDER BY year desc, month desc";
+$sql="
+(
+	SELECT
+		year(mindate) as year,
+		month(mindate) as month
+	FROM
+		report
+)
+UNION
+(
+	SELECT
+		year(maxdate) as year,
+		month(maxdate) as month
+	FROM
+		report
+)
+ORDER BY year desc, month desc";
 
 $query = $mysqli->query($sql) or die("Query failed: ".$mysqli->error." (Error #" .$mysqli->errno.")");
 
