@@ -37,8 +37,6 @@
 
 function tmpl_reportData($reportnumber, $reports, $host_lookup = 1) {
 
-	global $dmarc_where;
-
 	$title_message = "Click to toggle sort direction by this column";
 	
 	if (!$reportnumber) {
@@ -48,19 +46,17 @@ function tmpl_reportData($reportnumber, $reports, $host_lookup = 1) {
 	$reportdata[] = "";
 	$reportdata[] = "<script type=\"text/javascript\">sorttable();</script>";
     
-//     $reportdata[] = "<!-- Start of report data -->";
 	$reportsum    = 0;
 
 	if (isset($reports[$reportnumber])) {
 		$row = $reports[$reportnumber];
 		$row['raw_xml'] = formatXML($row['raw_xml']);
 		$row = array_map('htmlspecialchars', $row);
-//         $reportdata[] = "<a id='rpt".$reportnumber."'></a>";
 
 		$reportdata[] = "<div id='report_desc_container' class='center reportdesc_container'>";
 		$reportdata[] = "<div id='report_desc' class='center reportdesc'>Report from ".$row['org']." for ".$row['domain']."<br>(". format_date($row['mindate'], "r" ). " - ".format_date($row['maxdate'], "r" ).")<br> Policies: adkim=" . $row['policy_adkim'] . ", aspf=" . $row['policy_aspf'] .  ", p=" . $row['policy_p'] .  ", sp=" . $row['policy_sp'] .  ", pct=" . $row['policy_pct'] . "</div>";
 
-		$reportdata[] = "<div style='display:inline-block;margin-left:20px;'><img src='xml.png' id='xml_html_img' title='Show Raw Report XML' onclick='showXML()'></div>";
+		$reportdata[] = "<div style='display:inline-block;margin-left:20px;'><img src='xml.png' id='xml_html_img' width='30px' alt='Show Raw Report XML' title='Show Raw Report XML' onclick='showXML()'></div>";
 
 		$reportdata[] = "</div>";
 
@@ -82,21 +78,48 @@ function tmpl_reportData($reportnumber, $reports, $host_lookup = 1) {
 	$reportdata[] = "      <th title='" . $title_message . "'>Disposition</th>";
 	$reportdata[] = "      <th title='" . $title_message . "'>Reason</th>";
 	$reportdata[] = "      <th title='" . $title_message . "'>DKIM<br />Domain</th>";
-	$reportdata[] = "      <th title='" . $title_message . "'>DKIM<br />Aligned</th>";
+	$reportdata[] = "      <th title='" . $title_message . "'>DKIM<br />Auth</th>";
 	$reportdata[] = "      <th title='" . $title_message . "'>SPF<br />Domain</th>";
-	$reportdata[] = "      <th title='" . $title_message . "'>SPF<br />Aligned</th>";
-// 	$reportdata[] = "      <th><img src='xml.png' id='xml_html_img' title='Show Raw Report XML' onclick='showXML()' style='float:left;'></th>";
+	$reportdata[] = "      <th title='" . $title_message . "'>SPF<br />Auth</th>";
+	$reportdata[] = "      <th title='" . $title_message . "'>DKIM<br />Align</th>";
+	$reportdata[] = "      <th title='" . $title_message . "'>SPF<br />Align</th>";
 	$reportdata[] = "    </tr>";
 	$reportdata[] = "  </thead>";
-
 	$reportdata[] = "  <tbody>";
 
 	global $mysqli;
-	$sql = "SELECT *
-	        FROM rptrecord
-	        WHERE serial = $reportnumber" .
-	              ( $dmarc_where ? " AND $dmarc_where" : "" ) . "
-	        ORDER BY ip ASC";
+
+$sql = "
+SELECT
+    *,
+    (CASE
+		WHEN dkim_align = 'fail' THEN 0
+		WHEN dkim_align = 'pass' THEN 1
+		ELSE 3
+    END)
+    +
+    (CASE
+		WHEN spf_align = 'fail' THEN 0
+		WHEN spf_align = 'pass' THEN 1
+		ELSE 3
+	END)
+	AS dmarc_result_min,
+	(CASE
+		WHEN dkim_align = 'fail' THEN 0
+		WHEN dkim_align = 'pass' THEN 1
+		ELSE 3
+    END)
+    +
+    (CASE
+		WHEN spf_align = 'fail' THEN 0
+		WHEN spf_align = 'pass' THEN 1
+		ELSE 3
+	END)
+	AS dmarc_result_max
+FROM
+    rptrecord
+WHERE serial = " . $reportnumber;
+
 // Debug
 // echo "<br><b>sql reportdata =</b> $sql<br>";
 
@@ -113,7 +136,7 @@ function tmpl_reportData($reportnumber, $reports, $host_lookup = 1) {
 		/* escape html characters after exploring binary values, which will be messed up */
 		$row = array_map('htmlspecialchars', $row);
 
-		$reportdata[] = "    <tr class='".get_dmarc_record_color($row)[0]."'>";
+		$reportdata[] = "    <tr class='".get_dmarc_result($row)[0]."' title='DMARC Result: " . get_dmarc_result($row)[2] . "'>";
 		$reportdata[] = "      <td>". $ip. "</td>";
 		if ( $host_lookup ) {
 			$reportdata[] = "      <td>". gethostbyaddr($ip). "</td>";
@@ -124,9 +147,11 @@ function tmpl_reportData($reportnumber, $reports, $host_lookup = 1) {
 		$reportdata[] = "      <td>". $row['disposition']. "</td>";
 		$reportdata[] = "      <td>". $row['reason']. "</td>";
 		$reportdata[] = "      <td>". $row['dkimdomain']. "</td>";
-		$reportdata[] = "      <td>". $row['dkim_align']. "</td>";
+		$reportdata[] = "      <td class='" . get_status_color($row['dkimresult'])[0] . "'>". $row['dkimresult']. "</td>";
 		$reportdata[] = "      <td>". $row['spfdomain']. "</td>";
-		$reportdata[] = "      <td>". $row['spf_align']. "</td>";
+		$reportdata[] = "      <td class='" . get_status_color($row['spfresult'])[0] . "'>". $row['spfresult']. "</td>";
+		$reportdata[] = "      <td class='" . get_status_color($row['dkim_align'])[0] . "'>". $row['dkim_align']. "</td>";
+		$reportdata[] = "      <td class='" . get_status_color($row['spf_align'])[0] . "'>". $row['spf_align']. "</td>";
 		$reportdata[] = "    </tr>";
 
 		$reportsum += $row['rcount'];
@@ -199,6 +224,10 @@ if(isset($_GET['dmarc'])){
 	$dmarc_select= '';
 }
 
+if( $dmarc_select == "all" ) {
+	$dmarc_select= '';
+}
+
 // Debug
 //echo "<br />D=$dom_select <br /> O=$org_select <br />";
 
@@ -227,37 +256,35 @@ if( $sortorder ) {
 	$sort = "DESC";
 }
 
-// DMARC
-// dkim_align spf_align
-// --------------------------------------------------------------------------
-switch ($dmarc_select) {
-	case 'PASS': // DKIM or SPF Pass: Green
-		$dmarc_where = $dmarc_result[$dmarc_select]['where_stmt'];
-		break;
-	case 'FAIL': // neither of DKIM or SPF Pass: Red
-		$dmarc_where = $dmarc_result[$dmarc_select]['where_stmt'];
-		break;
-	default:
-		break;
-}
-
 // Include the rcount via left join, so we do not have to make an sql query
 // for every single report.
 // --------------------------------------------------------------------------
 
-$sql = "SELECT report.*,
-               SUM(rptrecord.rcount) AS rcount
-        FROM report
-        LEFT JOIN
-          (SELECT rcount,
-                  serial
-          FROM rptrecord) AS rptrecord
-        ON report.serial = rptrecord.serial
-        WHERE report.serial = " . $mysqli->real_escape_string($reportid) . "
-        GROUP BY serial
-        ORDER BY mindate $sort,
-                 maxdate $sort,
-                 org";
+$sql = "
+SELECT
+	report.*,
+	sum(rptrecord.rcount) AS rcount,
+	MIN(rptrecord.dkimresult) AS dkimresult,
+	MIN(rptrecord.spfresult) AS spfresult
+FROM
+	report
+LEFT JOIN
+	(
+	SELECT
+		rcount,
+		COALESCE(dkimresult, 'neutral') AS dkimresult,
+		COALESCE(spfresult, 'neutral') AS spfresult,
+		serial
+	FROM
+		rptrecord
+	)
+	AS rptrecord
+ON
+	report.serial = rptrecord.serial
+WHERE report.serial = " . $mysqli->real_escape_string($reportid) . "
+GROUP BY serial
+ORDER BY mindate $sort, maxdate $sort , org";
+
 
 // Debug
 // echo "<br /><b>Data Report sql:</b> $sql<br />";
